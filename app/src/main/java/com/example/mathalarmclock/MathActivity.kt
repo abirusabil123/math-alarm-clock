@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
+import android.app.NotificationManager
 
 class MathActivity : ComponentActivity() {
 
@@ -36,6 +37,10 @@ class MathActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Dismiss notification when activity starts
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(1)
 
         // Keep screen on using modern method
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
