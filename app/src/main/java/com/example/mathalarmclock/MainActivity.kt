@@ -1,48 +1,79 @@
 package com.example.mathalarmclock
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
-import java.util.Calendar
-import android.Manifest
-import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkNotificationPermission() // Add this line
+
+        checkExactAlarmPermission() // Add this
         setContent {
             MathAlarmClockTheme {
                 AlarmScreen()
             }
         }
     }
+
+    private fun checkExactAlarmPermission() {
+        val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Request permission
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = "package:$packageName".toUri()
+                    startActivity(this)
+                }
+            }
+        }
+    }
+
     private fun checkNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    1
+                    this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1
                 )
             }
         }
@@ -69,8 +100,7 @@ fun AlarmScreen() {
 
         // Hour selector
         Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Hour: $hour", modifier = Modifier.width(80.dp))
             Slider(
@@ -83,8 +113,7 @@ fun AlarmScreen() {
 
         // Minute selector
         Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Minute: $minute", modifier = Modifier.width(80.dp))
             Slider(
@@ -98,8 +127,7 @@ fun AlarmScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { setAlarm(context, hour, minute) },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { setAlarm(context, hour, minute) }, modifier = Modifier.fillMaxWidth()
         ) {
             Text("Set Alarm for $hour:$minute")
         }
@@ -119,10 +147,7 @@ private fun setAlarm(context: Context, hour: Int, minute: Int) {
 
     val intent = Intent(context, AlarmReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(
-        context,
-        0,
-        intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -131,9 +156,7 @@ private fun setAlarm(context: Context, hour: Int, minute: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         if (alarmManager.canScheduleExactAlarms()) {
             alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
+                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
             )
             Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
         } else {
@@ -146,9 +169,7 @@ private fun setAlarm(context: Context, hour: Int, minute: Int) {
         // For older Android versions
         try {
             alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
+                AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
             )
             Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
         } catch (e: SecurityException) {
