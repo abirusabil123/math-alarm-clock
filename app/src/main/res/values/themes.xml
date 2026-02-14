@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MathAlarmClock" parent="android:Theme.Material.Light">
+    <style name="Theme.MathAlarmClock" parent="android:Theme.Material.Light.NoActionBar">
         <!-- Splash screen background color - dark blue for dark mode -->
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:statusBarColor">@color/splash_background</item>
