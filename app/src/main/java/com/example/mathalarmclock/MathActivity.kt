@@ -1,12 +1,7 @@
 package com.example.mathalarmclock
 
 import android.app.NotificationManager
-import android.media.MediaPlayer
-import android.os.Build
 import android.os.Bundle
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,9 +27,6 @@ import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
 
 class MathActivity : ComponentActivity() {
 
-    private var mediaPlayer: MediaPlayer? = null
-    private var vibrator: Vibrator? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,44 +34,8 @@ class MathActivity : ComponentActivity() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(1)
 
-        // Keep screen on using modern method
+        // Keep screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // Setup vibrator
-        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService(VibratorManager::class.java)
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION") getSystemService(Vibrator::class.java)
-        }
-
-        // Ensure alarm stream volume is max
-        val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
-        audioManager.setStreamVolume(
-            android.media.AudioManager.STREAM_ALARM,
-            audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM),
-            0
-        )
-        // Start alarm sound
-        try {
-            mediaPlayer = MediaPlayer.create(this, R.raw.alarm)
-            mediaPlayer?.isLooping = true
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            // No sound file yet
-            e.printStackTrace()
-        }
-
-        // Start vibration pattern
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator?.vibrate(
-                VibrationEffect.createWaveform(
-                    longArrayOf(0, 1000, 1000), intArrayOf(0, 255, 0), -1
-                )
-            )
-        } else {
-            @Suppress("DEPRECATION") vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
-        }
 
         setContent {
             MathAlarmClockTheme {
@@ -92,19 +48,25 @@ class MathActivity : ComponentActivity() {
     }
 
     private fun stopAlarm() {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        // Only stop when math is solved
+        try {
+            AlarmReceiver.mediaPlayer?.stop()
+            AlarmReceiver.mediaPlayer?.release()
+            AlarmReceiver.mediaPlayer = null
 
-        vibrator?.cancel()
-
+            AlarmReceiver.vibrator?.cancel()
+            AlarmReceiver.vibrator = null
+            AlarmReceiver.isAlarmPlaying = false
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         finish()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.release()
-        vibrator?.cancel()
+        // DO NOT stop the alarm here - it should continue if activity is destroyed without solving
+        // The alarm will keep playing until user solves it and calls stopAlarm()
     }
 }
 
