@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -116,7 +115,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
         Text(
             text = "WAKE UP!",
             fontSize = 32.sp,
-            color = MaterialTheme.colorScheme.error,
+            color = Color.Red,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -176,8 +175,8 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
             Text(
                 text = message,
                 modifier = Modifier.padding(top = 24.dp),
-                color = if (message.startsWith("✓")) Color.Black
-                else MaterialTheme.colorScheme.error,
+                color = if (message.startsWith("✓")) Color.Green
+                else Color.Red,
                 fontSize = 18.sp
             )
         }
