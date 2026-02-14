@@ -1,0 +1,64 @@
+package com.example.mathalarmclock
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
+import android.widget.Toast
+import java.util.Calendar
+
+class Utilities {
+    companion object {
+        fun setAlarm(context: Context, hour: Int, minute: Int) {
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, hour)
+                set(Calendar.MINUTE, minute)
+                set(Calendar.SECOND, 0)
+
+                if (before(Calendar.getInstance())) {
+                    add(Calendar.DAY_OF_MONTH, 1)
+                }
+            }
+
+            val intent = Intent(context, AlarmReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            // Check if we can set exact alarms (Android 12+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
+                    )
+                    Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
+                } else {
+                    // Request permission
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    context.startActivity(intent)
+                    Toast.makeText(
+                        context, "Please grant exact alarm permission", Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                // For older Android versions
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
+                    )
+                    Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
+                } catch (e: SecurityException) {
+                    Toast.makeText(context, "Cannot set exact alarm", Toast.LENGTH_LONG).show()
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+}
