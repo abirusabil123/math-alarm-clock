@@ -36,24 +36,21 @@ class AlarmReceiver : BroadcastReceiver() {
 
             // Start vibration
             vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                val vibratorManager =
+                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
                 vibratorManager.defaultVibrator
             } else {
-                @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                @Suppress("DEPRECATION") context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator?.vibrate(
                     VibrationEffect.createWaveform(
-                        longArrayOf(0, 1000, 1000),
-                        intArrayOf(0, 255, 0),
-                        0  // Repeat continuously
+                        longArrayOf(0, 1000, 1000), intArrayOf(0, 255, 0), 0  // Repeat continuously
                     )
                 )
             } else {
-                @Suppress("DEPRECATION")
-                vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
+                @Suppress("DEPRECATION") vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
             }
 
             isAlarmPlaying = true
@@ -71,23 +68,18 @@ class AlarmReceiver : BroadcastReceiver() {
         )
 
         val notificationBuilder = NotificationCompat.Builder(context, "alarm_channel")
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("Math Alarm")
+            .setSmallIcon(android.R.drawable.ic_dialog_alert).setContentTitle("Math Alarm")
             .setContentText("Solve the puzzle to stop alarm")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setFullScreenIntent(pendingIntent, true)
-            .setAutoCancel(true)
-            .setOngoing(true)
+            .setCategory(NotificationCompat.CATEGORY_ALARM).setFullScreenIntent(pendingIntent, true)
+            .setAutoCancel(true).setOngoing(true)
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = android.app.NotificationChannel(
-                "alarm_channel",
-                "Alarm Notifications",
-                NotificationManager.IMPORTANCE_HIGH
+                "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setBypassDnd(true)
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
