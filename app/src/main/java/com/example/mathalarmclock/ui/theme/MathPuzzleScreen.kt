@@ -1,5 +1,6 @@
 package com.example.mathalarmclock.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.random.Random
@@ -106,6 +108,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color(0xFFF5F5F5))
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -120,7 +123,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
         Text(
             text = "Solve to stop alarm",
             fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            color = Color.Black,
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
@@ -173,7 +176,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
             Text(
                 text = message,
                 modifier = Modifier.padding(top = 24.dp),
-                color = if (message.startsWith("✓")) MaterialTheme.colorScheme.primary
+                color = if (message.startsWith("✓")) Color.Black
                 else MaterialTheme.colorScheme.error,
                 fontSize = 18.sp
             )

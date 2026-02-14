@@ -43,6 +43,8 @@ class MathActivity : ComponentActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        // Wait
+        Thread.sleep(1000)
         finish()
     }
 
