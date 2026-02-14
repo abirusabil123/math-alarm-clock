@@ -43,6 +43,7 @@ class MathActivity : ComponentActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        finish()
     }
 
     override fun onDestroy() {
