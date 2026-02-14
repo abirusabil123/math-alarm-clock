@@ -1,5 +1,6 @@
 package com.example.mathalarmclock.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -101,17 +102,9 @@ fun AlarmScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
     ) {
-        // Header
-        Text(
-            text = "Math Alarm Clock",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
         // Current Alarm Status Card
         Card(
             modifier = Modifier
@@ -326,10 +319,7 @@ fun AlarmScreen() {
                         }"
                         else "Set Alarm for ${
                             String.format(
-                                Locale.getDefault(),
-                                "%02d:%02d",
-                                hour,
-                                minute
+                                Locale.getDefault(), "%02d:%02d", hour, minute
                             )
                         }"
                     )
