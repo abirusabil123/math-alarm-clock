@@ -13,8 +13,7 @@ class AlarmReceiver : BroadcastReceiver() {
     @SuppressLint("FullScreenIntentPolicy")
     override fun onReceive(context: Context, intent: Intent) {
         val mathIntent = Intent(context, MathActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
         val pendingIntent = PendingIntent.getActivity(
@@ -25,24 +24,21 @@ class AlarmReceiver : BroadcastReceiver() {
         )
 
         val notificationBuilder = NotificationCompat.Builder(context, "alarm_channel")
-            .setSmallIcon(android.R.drawable.ic_dialog_alert)
-            .setContentTitle("Math Alarm")
+            .setSmallIcon(android.R.drawable.ic_dialog_alert).setContentTitle("Math Alarm")
             .setContentText("Solve the puzzle to stop alarm")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setFullScreenIntent(pendingIntent, true)
+            .setCategory(NotificationCompat.CATEGORY_ALARM).setFullScreenIntent(pendingIntent, true)
             .setAutoCancel(true)
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = android.app.NotificationChannel(
-                "alarm_channel",
-                "Alarm Notifications",
-                NotificationManager.IMPORTANCE_HIGH
+                "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setBypassDnd(true)
-                setLockscreenVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
             }
             notificationManager.createNotificationChannel(channel)
         }

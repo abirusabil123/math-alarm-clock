@@ -1,5 +1,6 @@
 package com.example.mathalarmclock
 
+import android.app.NotificationManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
-import android.app.NotificationManager
 
 class MathActivity : ComponentActivity() {
 
@@ -50,8 +50,7 @@ class MathActivity : ComponentActivity() {
             val vibratorManager = getSystemService(VibratorManager::class.java)
             vibratorManager.defaultVibrator
         } else {
-            @Suppress("DEPRECATION")
-            getSystemService(Vibrator::class.java)
+            @Suppress("DEPRECATION") getSystemService(Vibrator::class.java)
         }
 
         // Start alarm sound
@@ -68,14 +67,11 @@ class MathActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator?.vibrate(
                 VibrationEffect.createWaveform(
-                    longArrayOf(0, 1000, 1000),
-                    intArrayOf(0, 255, 0),
-                    -1
+                    longArrayOf(0, 1000, 1000), intArrayOf(0, 255, 0), -1
                 )
             )
         } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
+            @Suppress("DEPRECATION") vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
         }
 
         setContent {
@@ -83,8 +79,7 @@ class MathActivity : ComponentActivity() {
                 MathPuzzleScreen(
                     onCorrectAnswer = {
                         stopAlarm()
-                    }
-                )
+                    })
             }
         }
     }
@@ -125,17 +120,14 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
         )
 
         Text(
-            text = "2 + 2 = ?",
-            fontSize = 48.sp,
-            modifier = Modifier.padding(bottom = 32.dp)
+            text = "2 + 2 = ?", fontSize = 48.sp, modifier = Modifier.padding(bottom = 32.dp)
         )
 
         Button(
             onClick = {
                 message = "Correct! Alarm stopped."
                 onCorrectAnswer()
-            },
-            modifier = Modifier
+            }, modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
         ) {
