@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
+import androidx.compose.ui.text.intl.Locale
 import java.util.Calendar
 
 class Utilities {
@@ -38,7 +39,13 @@ class Utilities {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
                     )
-                    Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context, "Alarm set for ${
+                            String.format(
+                                Locale.current.region, "%02d:%02d", hour, minute
+                            )
+                        }", Toast.LENGTH_LONG
+                    ).show()
                 } else {
                     // Request permission
                     val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
@@ -53,12 +60,46 @@ class Utilities {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
                     )
-                    Toast.makeText(context, "Alarm set for $hour:$minute", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context, "Alarm set for ${
+                            String.format(
+                                Locale.current.region, "%02d:%02d", hour, minute
+                            )
+                        }", Toast.LENGTH_LONG
+                    ).show()
                 } catch (e: SecurityException) {
                     Toast.makeText(context, "Cannot set exact alarm", Toast.LENGTH_LONG).show()
                     e.printStackTrace()
                 }
             }
+        }
+
+        fun cancelAlarm(context: Context) {
+            val intent = Intent(context, AlarmReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.cancel(pendingIntent)
+
+            // Also stop any currently playing alarm
+            try {
+                AlarmReceiver.mediaPlayer?.stop()
+                AlarmReceiver.mediaPlayer?.release()
+                AlarmReceiver.mediaPlayer = null
+
+                AlarmReceiver.vibrator?.cancel()
+                AlarmReceiver.vibrator = null
+                AlarmReceiver.isAlarmPlaying = false
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            Toast.makeText(context, "Alarm cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 }
