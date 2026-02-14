@@ -53,6 +53,13 @@ class MathActivity : ComponentActivity() {
             @Suppress("DEPRECATION") getSystemService(Vibrator::class.java)
         }
 
+        // Ensure alarm stream volume is max
+        val audioManager = getSystemService(AUDIO_SERVICE) as android.media.AudioManager
+        audioManager.setStreamVolume(
+            android.media.AudioManager.STREAM_ALARM,
+            audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM),
+            0
+        )
         // Start alarm sound
         try {
             mediaPlayer = MediaPlayer.create(this, R.raw.alarm)
