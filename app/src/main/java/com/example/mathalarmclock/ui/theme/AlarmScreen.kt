@@ -1,4 +1,4 @@
-package com.example.mathalarmclock
+package com.example.mathalarmclock.ui.theme
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.mathalarmclock.Utilities
 
 @Composable
 fun AlarmScreen() {
@@ -69,7 +70,7 @@ fun AlarmScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { Utilities.setAlarm(context, hour, minute) },
+            onClick = { Utilities.Companion.setAlarm(context, hour, minute) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Set Alarm for $hour:$minute")

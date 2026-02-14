@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import com.example.mathalarmclock.ui.theme.AlarmScreen
 import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
 
 class MainActivity : ComponentActivity() {
