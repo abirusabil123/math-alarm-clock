@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.mathalarmclock.R
@@ -41,6 +42,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@Preview
 @Composable
 fun AlarmScreen() {
     val context = LocalContext.current
