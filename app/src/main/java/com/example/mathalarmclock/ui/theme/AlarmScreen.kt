@@ -177,27 +177,26 @@ fun AlarmScreen() {
                     )
                     Text(
                         text = when {
-                            lastSetRepeatDays.isEmpty() -> "Alarm will ring once"
-                            lastSetRepeatDays.size == 7 -> "Alarm rings every day"
-                            else -> {
-                                val dayNames = mapOf(
-                                    1 to "Sun",
-                                    2 to "Mon",
-                                    3 to "Tue",
-                                    4 to "Wed",
-                                    5 to "Thu",
-                                    6 to "Fri",
-                                    7 to "Sat"
-                                )
-                                val days = lastSetRepeatDays.sorted().map { dayNames[it] }
-                                    .joinToString(", ")
-                                "Rings on: $days"
-                            }
-                        },
+                        lastSetRepeatDays.isEmpty() -> "Alarm will ring once"
+                        lastSetRepeatDays.size == 7 -> "Alarm rings every day"
+                        else -> {
+                            val dayNames = mapOf(
+                                1 to "Sun",
+                                2 to "Mon",
+                                3 to "Tue",
+                                4 to "Wed",
+                                5 to "Thu",
+                                6 to "Fri",
+                                7 to "Sat"
+                            )
+                            val days = lastSetRepeatDays.sorted().map { dayNames[it] }
+                                .joinToString(", ")
+                            "Rings on: $days"
+                        }
+                    },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                        modifier = Modifier.padding(top = 4.dp))
                 } else {
                     Text(
                         text = "Set a new alarm below",
@@ -377,7 +376,7 @@ fun AlarmScreen() {
                 Button(
                     onClick = { setAlarm() },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = !(isAlarmSet && hour == lastSetHour && minute == lastSetMinute)
+                    enabled = !(isAlarmSet && hour == lastSetHour && minute == lastSetMinute && repeatDays == lastSetRepeatDays)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_alarm_set),
