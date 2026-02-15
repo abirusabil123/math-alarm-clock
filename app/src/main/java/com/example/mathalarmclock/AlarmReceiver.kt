@@ -24,6 +24,11 @@ class AlarmReceiver : BroadcastReceiver() {
 
     @SuppressLint("FullScreenIntentPolicy")
     override fun onReceive(context: Context, intent: Intent) {
+        // Get alarm details from intent
+        val hour = intent.getIntExtra("hour", 0)
+        val minute = intent.getIntExtra("minute", 0)
+        val repeatDays = intent.getSerializableExtra("repeatDays") as? Array<Int> ?: emptyArray()
+
         // Only start if not already playing
         if (!isAlarmPlaying) {
             // Start alarm sound
@@ -60,6 +65,9 @@ class AlarmReceiver : BroadcastReceiver() {
 
         val mathIntent = Intent(context, MathActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("hour", hour)
+            putExtra("minute", minute)
+            putExtra("repeatDays", repeatDays)
         }
 
         val pendingIntent = PendingIntent.getActivity(

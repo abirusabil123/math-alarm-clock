@@ -13,22 +13,26 @@ class AlarmPreferences(context: Context) {
         private const val KEY_LAST_SET_HOUR = "last_set_hour"
         private const val KEY_LAST_SET_MINUTE = "last_set_minute"
         private const val KEY_IS_ALARM_SET = "is_alarm_set"
+        private const val KEY_REPEAT_DAYS = "repeat_days"
         private const val DEFAULT_HOUR = 12
         private const val DEFAULT_MINUTE = 0
     }
 
-    fun saveAlarm(hour: Int, minute: Int, isSet: Boolean) {
+    fun saveAlarm(hour: Int, minute: Int, isSet: Boolean, repeatDays: Set<Int> = emptySet()) {
         prefs.edit().apply {
             putInt(KEY_LAST_SET_HOUR, hour)
             putInt(KEY_LAST_SET_MINUTE, minute)
             putBoolean(KEY_IS_ALARM_SET, isSet)
+            putStringSet(KEY_REPEAT_DAYS, repeatDays.map { it.toString() }.toSet())
             apply()
         }
     }
 
     fun getLastSetHour(): Int = prefs.getInt(KEY_LAST_SET_HOUR, DEFAULT_HOUR)
-
     fun getLastSetMinute(): Int = prefs.getInt(KEY_LAST_SET_MINUTE, DEFAULT_MINUTE)
-
     fun isAlarmSet(): Boolean = prefs.getBoolean(KEY_IS_ALARM_SET, false)
+    fun getRepeatDays(): Set<Int> {
+        return prefs.getStringSet(KEY_REPEAT_DAYS, emptySet())?.mapNotNull { it.toIntOrNull() }
+            ?.toSet() ?: emptySet()
+    }
 }

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,12 +53,15 @@ fun AlarmScreen() {
     var lastSetHour by remember { mutableIntStateOf(12) }
     var lastSetMinute by remember { mutableIntStateOf(0) }
     var lastSetTime by remember { mutableStateOf("Not set") }
+    var repeatDays by remember { mutableStateOf<Set<Int>>(emptySet()) }
+    var lastSetRepeatDays by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
     // Load saved alarm preferences when screen loads
     LaunchedEffect(Unit) {
         val prefs = AlarmPreferences(context)
         lastSetHour = prefs.getLastSetHour()
         lastSetMinute = prefs.getLastSetMinute()
+        lastSetRepeatDays = prefs.getRepeatDays()  // Add this line
         isAlarmSet = prefs.isAlarmSet()
 
         // Format last set time
@@ -70,19 +75,21 @@ fun AlarmScreen() {
         // Initialize current selection with last set time
         hour = lastSetHour
         minute = lastSetMinute
+        repeatDays = lastSetRepeatDays  // Add this line
     }
 
     fun setAlarm() {
-        Utilities.setAlarm(context, hour, minute)
+        Utilities.setAlarm(context, hour, minute, repeatDays)  // Add repeatDays here
 
         // Save alarm preferences
         val prefs = AlarmPreferences(context)
-        prefs.saveAlarm(hour, minute, true)
+        prefs.saveAlarm(hour, minute, true, repeatDays)  // Add repeatDays here
 
         // Update UI state
         isAlarmSet = true
         lastSetHour = hour
         lastSetMinute = minute
+        lastSetRepeatDays = repeatDays
 
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
@@ -97,17 +104,20 @@ fun AlarmScreen() {
 
         // Update preferences
         val prefs = AlarmPreferences(context)
-        prefs.saveAlarm(lastSetHour, lastSetMinute, false)
+        prefs.saveAlarm(lastSetHour, lastSetMinute, false, emptySet())  // Add emptySet()
 
         // Update UI state
         isAlarmSet = false
+        repeatDays = emptySet()
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Current Alarm Status Card
         Card(
@@ -166,7 +176,24 @@ fun AlarmScreen() {
                         fontSize = 32.sp
                     )
                     Text(
-                        text = "Alarm will ring at this time daily",
+                        text = when {
+                            lastSetRepeatDays.isEmpty() -> "Alarm will ring once"
+                            lastSetRepeatDays.size == 7 -> "Alarm rings every day"
+                            else -> {
+                                val dayNames = mapOf(
+                                    1 to "Sun",
+                                    2 to "Mon",
+                                    3 to "Tue",
+                                    4 to "Wed",
+                                    5 to "Thu",
+                                    6 to "Fri",
+                                    7 to "Sat"
+                                )
+                                val days = lastSetRepeatDays.sorted().map { dayNames[it] }
+                                    .joinToString(", ")
+                                "Rings on: $days"
+                            }
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier.padding(top = 4.dp)
@@ -300,6 +327,50 @@ fun AlarmScreen() {
                     )
                 }
 
+                // Add after minute selector, before the Set Alarm button
+                Text(
+                    text = "Repeat:",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+
+                // Days in two rows (Monday first)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val days = listOf("Mon" to 2, "Tue" to 3, "Wed" to 4, "Thu" to 5)
+                    days.forEach { (dayName, dayValue) ->
+                        DaySelectionChip(
+                            day = dayName, isSelected = repeatDays.contains(dayValue), onToggle = {
+                                repeatDays = if (repeatDays.contains(dayValue)) {
+                                    repeatDays - dayValue
+                                } else {
+                                    repeatDays + dayValue
+                                }
+                            })
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val days = listOf("Fri" to 6, "Sat" to 7, "Sun" to 1)
+                    days.forEach { (dayName, dayValue) ->
+                        DaySelectionChip(
+                            day = dayName, isSelected = repeatDays.contains(dayValue), onToggle = {
+                                repeatDays = if (repeatDays.contains(dayValue)) {
+                                    repeatDays - dayValue
+                                } else {
+                                    repeatDays + dayValue
+                                }
+                            })
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Set Alarm Button
@@ -331,4 +402,18 @@ fun AlarmScreen() {
             }
         }
     }
+}
+
+@Composable
+fun DaySelectionChip(
+    day: String, isSelected: Boolean, onToggle: () -> Unit
+) {
+    androidx.compose.material3.AssistChip(
+        onClick = onToggle,
+        label = { Text(day) },
+        colors = androidx.compose.material3.AssistChipDefaults.assistChipColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+            else MaterialTheme.colorScheme.surfaceVariant
+        )
+    )
 }

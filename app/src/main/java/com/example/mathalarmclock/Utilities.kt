@@ -14,7 +14,7 @@ import java.util.Calendar
 
 class Utilities {
     companion object {
-        fun setAlarm(context: Context, hour: Int, minute: Int) {
+        fun setAlarm(context: Context, hour: Int, minute: Int, repeatDays: Set<Int> = emptySet()) {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
@@ -25,7 +25,11 @@ class Utilities {
                 }
             }
 
-            val intent = Intent(context, AlarmReceiver::class.java)
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
+                putExtra("hour", hour)
+                putExtra("minute", minute)
+                putExtra("repeatDays", repeatDays.toTypedArray())
+            }
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 0,

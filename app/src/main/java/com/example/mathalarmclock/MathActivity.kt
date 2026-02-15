@@ -11,9 +11,17 @@ import com.example.mathalarmclock.ui.theme.MathAlarmClockTheme
 import com.example.mathalarmclock.ui.theme.MathPuzzleScreen
 
 class MathActivity : ComponentActivity() {
+    private var hour: Int = 0
+    private var minute: Int = 0
+    private var repeatDays: Array<Int> = emptyArray()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Get alarm details
+        hour = intent.getIntExtra("hour", 0)
+        minute = intent.getIntExtra("minute", 0)
+        repeatDays = intent.getSerializableExtra("repeatDays") as? Array<Int> ?: emptyArray()
 
         // Dismiss notification when activity starts
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -33,7 +41,7 @@ class MathActivity : ComponentActivity() {
     }
 
     private fun stopAlarm() {
-        // Only stop when math is solved
+        // Stop alarm sound and vibration (your existing code)
         try {
             AlarmReceiver.mediaPlayer?.stop()
             AlarmReceiver.mediaPlayer?.release()
@@ -45,6 +53,12 @@ class MathActivity : ComponentActivity() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // If it's a repeating alarm, set the next occurrence
+        if (repeatDays.isNotEmpty()) {
+            Utilities.setAlarm(this, hour, minute, repeatDays.toSet())
+        }
+
         finish()
     }
 
