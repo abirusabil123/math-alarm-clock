@@ -3,6 +3,7 @@
 package com.example.mathalarmclock
 
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -41,22 +42,13 @@ class MathActivity : ComponentActivity() {
     }
 
     private fun stopAlarm() {
-        // Stop alarm sound and vibration (your existing code)
-        try {
-            AlarmReceiver.mediaPlayer?.stop()
-            AlarmReceiver.mediaPlayer?.release()
-            AlarmReceiver.mediaPlayer = null
-
-            AlarmReceiver.vibrator?.cancel()
-            AlarmReceiver.vibrator = null
-            AlarmReceiver.isAlarmPlaying = false
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // Stop alarm service
+        val serviceIntent = Intent(this, AlarmService::class.java)
+        stopService(serviceIntent)
 
         // If it's a repeating alarm, set the next occurrence
         if (repeatDays.isNotEmpty()) {
-            Utilities.setAlarm(this, hour, minute, repeatDays.toSet())
+            Utilities.setAlarm(this, hour, minute, repeatDays.toSet(), false)
         }
 
         finish()

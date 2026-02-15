@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.ui.text.intl.Locale
 import java.util.Calendar
+import android.app.AlarmManager.AlarmClockInfo
 
 class Utilities {
     companion object {
@@ -48,9 +49,15 @@ class Utilities {
             // Check if we can set exact alarms (Android 12+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
-                    )
+                    // Use AlarmClock API for better system integration
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val alarmClockInfo = AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+                        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+                    } else {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
+                        )
+                    }
                     if (showToast) {
                         Toast.makeText(
                             context, "Alarm set for ${
@@ -71,9 +78,14 @@ class Utilities {
             } else {
                 // For older Android versions
                 try {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
-                    )
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        val alarmClockInfo = AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+                        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+                    } else {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
+                        )
+                    }
                     if (showToast) {
                         Toast.makeText(
                             context, "Alarm set for ${
@@ -102,18 +114,9 @@ class Utilities {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             alarmManager.cancel(pendingIntent)
 
-            // Also stop any currently playing alarm
-            try {
-                AlarmReceiver.mediaPlayer?.stop()
-                AlarmReceiver.mediaPlayer?.release()
-                AlarmReceiver.mediaPlayer = null
-
-                AlarmReceiver.vibrator?.cancel()
-                AlarmReceiver.vibrator = null
-                AlarmReceiver.isAlarmPlaying = false
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            // Stop alarm service if running
+            val serviceIntent = Intent(context, AlarmService::class.java)
+            context.stopService(serviceIntent)
 
             Toast.makeText(context, "Alarm cancelled", Toast.LENGTH_SHORT).show()
         }

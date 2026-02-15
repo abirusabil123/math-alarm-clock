@@ -119,6 +119,9 @@ fun AlarmScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Current Alarm Status Card
         Card(
             modifier = Modifier
@@ -134,6 +137,7 @@ fun AlarmScreen() {
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -250,8 +254,6 @@ fun AlarmScreen() {
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         // Time Selection Card
         Card(
@@ -400,6 +402,8 @@ fun AlarmScreen() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
