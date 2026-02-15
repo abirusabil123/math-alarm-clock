@@ -14,7 +14,13 @@ import java.util.Calendar
 
 class Utilities {
     companion object {
-        fun setAlarm(context: Context, hour: Int, minute: Int, repeatDays: Set<Int> = emptySet()) {
+        fun setAlarm(
+            context: Context,
+            hour: Int,
+            minute: Int,
+            repeatDays: Set<Int> = emptySet(),
+            showToast: Boolean = true
+        ) {
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
@@ -45,13 +51,15 @@ class Utilities {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
                     )
-                    Toast.makeText(
-                        context, "Alarm set for ${
-                            String.format(
-                                Locale.current.region, "%02d:%02d", hour, minute
-                            )
-                        }", Toast.LENGTH_LONG
-                    ).show()
+                    if (showToast) {
+                        Toast.makeText(
+                            context, "Alarm set for ${
+                                String.format(
+                                    Locale.current.region, "%02d:%02d", hour, minute
+                                )
+                            }", Toast.LENGTH_LONG
+                        ).show()
+                    }
                 } else {
                     // Request permission
                     val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
@@ -66,13 +74,15 @@ class Utilities {
                     alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent
                     )
-                    Toast.makeText(
-                        context, "Alarm set for ${
-                            String.format(
-                                Locale.current.region, "%02d:%02d", hour, minute
-                            )
-                        }", Toast.LENGTH_LONG
-                    ).show()
+                    if (showToast) {
+                        Toast.makeText(
+                            context, "Alarm set for ${
+                                String.format(
+                                    Locale.current.region, "%02d:%02d", hour, minute
+                                )
+                            }", Toast.LENGTH_LONG
+                        ).show()
+                    }
                 } catch (e: SecurityException) {
                     Toast.makeText(context, "Cannot set exact alarm", Toast.LENGTH_LONG).show()
                     e.printStackTrace()

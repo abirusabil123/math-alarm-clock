@@ -15,7 +15,7 @@ class BootReceiver : BroadcastReceiver() {
                 val repeatDays = prefs.getRepeatDays()
 
                 // Reschedule the alarm
-                Utilities.setAlarm(context, hour, minute, repeatDays)
+                Utilities.setAlarm(context, hour, minute, repeatDays, false)
             }
         }
     }
