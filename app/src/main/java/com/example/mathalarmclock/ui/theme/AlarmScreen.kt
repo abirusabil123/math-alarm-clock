@@ -2,6 +2,10 @@
 
 package com.example.mathalarmclock.ui.theme
 
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -301,11 +305,22 @@ fun AlarmScreen() {
                         fontWeight = FontWeight.Medium
                     )
                     Slider(
-                        value = hour.toFloat(),
-                        onValueChange = { hour = it.toInt() },
-                        valueRange = 0f..23f,
-                        modifier = Modifier.weight(1f),
-                        steps = 23
+                        value = hour.toFloat(), onValueChange = {
+                            hour = it.toInt()
+                            // Vibrate on change
+                            val vibrator =
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(
+                                    VibrationEffect.createOneShot(
+                                        10,
+                                        VibrationEffect.DEFAULT_AMPLITUDE
+                                    )
+                                )
+                            } else {
+                                @Suppress("DEPRECATION") vibrator.vibrate(10)
+                            }
+                        }, valueRange = 0f..23f, modifier = Modifier.weight(1f), steps = 23
                     )
                 }
 
@@ -320,11 +335,22 @@ fun AlarmScreen() {
                         fontWeight = FontWeight.Medium
                     )
                     Slider(
-                        value = minute.toFloat(),
-                        onValueChange = { minute = it.toInt() },
-                        valueRange = 0f..59f,
-                        modifier = Modifier.weight(1f),
-                        steps = 59
+                        value = minute.toFloat(), onValueChange = {
+                            minute = it.toInt()
+                            // Vibrate on change
+                            val vibrator =
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(
+                                    VibrationEffect.createOneShot(
+                                        10,
+                                        VibrationEffect.DEFAULT_AMPLITUDE
+                                    )
+                                )
+                            } else {
+                                @Suppress("DEPRECATION") vibrator.vibrate(10)
+                            }
+                        }, valueRange = 0f..59f, modifier = Modifier.weight(1f), steps = 59
                     )
                 }
 
