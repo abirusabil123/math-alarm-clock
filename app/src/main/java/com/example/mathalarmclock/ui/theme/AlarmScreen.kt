@@ -251,7 +251,7 @@ fun AlarmScreen() {
                         onClick = {
                             hour = lastSetHour
                             minute = lastSetMinute
-                        }, modifier = Modifier.height(32.dp)
+                        }, modifier = Modifier.height(48.dp)
                     ) {
                         Text("Use", fontSize = 12.sp)
                     }
@@ -313,8 +313,7 @@ fun AlarmScreen() {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(
                                     VibrationEffect.createOneShot(
-                                        10,
-                                        VibrationEffect.DEFAULT_AMPLITUDE
+                                        10, VibrationEffect.DEFAULT_AMPLITUDE
                                     )
                                 )
                             } else {
@@ -343,8 +342,7 @@ fun AlarmScreen() {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 vibrator.vibrate(
                                     VibrationEffect.createOneShot(
-                                        10,
-                                        VibrationEffect.DEFAULT_AMPLITUDE
+                                        10, VibrationEffect.DEFAULT_AMPLITUDE
                                     )
                                 )
                             } else {
