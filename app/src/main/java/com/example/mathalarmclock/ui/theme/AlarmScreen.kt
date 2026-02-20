@@ -251,6 +251,8 @@ fun AlarmScreen() {
                         onClick = {
                             hour = lastSetHour
                             minute = lastSetMinute
+                            repeatDays = lastSetRepeatDays
+                            setAlarm()  // This calls the setAlarm function
                         }, modifier = Modifier.height(48.dp)
                     ) {
                         Text("Use", fontSize = 12.sp)
