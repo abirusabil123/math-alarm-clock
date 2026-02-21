@@ -3,6 +3,7 @@
 package com.example.mathalarmclock
 
 import android.app.AlarmManager
+import android.app.AlarmManager.AlarmClockInfo
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -11,7 +12,6 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.ui.text.intl.Locale
 import java.util.Calendar
-import android.app.AlarmManager.AlarmClockInfo
 
 class Utilities {
     companion object {
