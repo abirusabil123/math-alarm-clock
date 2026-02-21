@@ -3,6 +3,7 @@
 package com.example.mathalarmclock.ui.theme
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mathalarmclock.AlarmService.Companion.isAlarmPlaying
+import com.example.mathalarmclock.MathActivity
 import com.example.mathalarmclock.R
 import com.example.mathalarmclock.Utilities
 import java.text.SimpleDateFormat
@@ -166,10 +169,25 @@ fun AlarmScreen() {
                     }
 
                     if (isAlarmSet) {
-                        Button(
-                            onClick = { cancelAlarm() }, modifier = Modifier.height(36.dp)
-                        ) {
-                            Text("Cancel", fontSize = 14.sp)
+                        if (isAlarmPlaying) {
+                            // Alarm is currently ringing - open math screen
+                            Button(
+                                onClick = {
+                                    val intent = Intent(context, MathActivity::class.java).apply {
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    context.startActivity(intent)
+                                }, modifier = Modifier.height(36.dp)
+                            ) {
+                                Text("Dismiss", fontSize = 14.sp)
+                            }
+                        } else {
+                            // Normal cancel when alarm not ringing
+                            Button(
+                                onClick = { cancelAlarm() }, modifier = Modifier.height(36.dp)
+                            ) {
+                                Text("Cancel", fontSize = 14.sp)
+                            }
                         }
                     }
                 }
