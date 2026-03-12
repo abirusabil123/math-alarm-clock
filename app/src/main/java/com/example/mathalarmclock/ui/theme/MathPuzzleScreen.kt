@@ -33,6 +33,8 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
     var correctAnswer by remember { mutableIntStateOf(0) }
     var options by remember { mutableStateOf(listOf<Int>()) }
     var selectedOption by remember { mutableStateOf<Int?>(null) }
+    var isWaiting by remember { mutableStateOf(false) }
+    var waitTimer by remember { mutableIntStateOf(10) }
 
     // Define the question generation function inside the composable
     fun generateNewQuestion() {
@@ -93,17 +95,26 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
     LaunchedEffect(Unit) {
         generateNewQuestion()
     }
+    LaunchedEffect(isWaiting) {
+        if (isWaiting) {
+            kotlinx.coroutines.delay(waitTimer * 1000L)
+            isWaiting = false
+            generateNewQuestion()
+            selectedOption = null
+            message = ""
+        }
+    }
 
     fun checkAnswer(answer: Int) {
+        if (isWaiting) return
+
         selectedOption = answer
         if (answer == correctAnswer) {
             message = "✓ Correct! Well done!"
             onCorrectAnswer()
         } else {
-            message = "✗ Try again!"
-            // Generate new question after wrong answer
-            generateNewQuestion()
-            selectedOption = null
+            message = "✗ Wrong! Wait $waitTimer seconds"
+            isWaiting = true
         }
     }
 
@@ -148,7 +159,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
                         modifier = Modifier
                             .weight(1f)
                             .height(60.dp),
-                        enabled = selectedOption == null
+                        enabled = !isWaiting && selectedOption == null
                     ) {
                         Text(option.toString(), fontSize = 24.sp)
                     }
@@ -166,7 +177,7 @@ fun MathPuzzleScreen(onCorrectAnswer: () -> Unit) {
                         modifier = Modifier
                             .weight(1f)
                             .height(60.dp),
-                        enabled = selectedOption == null
+                        enabled = !isWaiting && selectedOption == null
                     ) {
                         Text(option.toString(), fontSize = 24.sp)
                     }
