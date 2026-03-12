@@ -442,17 +442,33 @@ fun AlarmScreen() {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isAlarmSet && hour == lastSetHour && minute == lastSetMinute) "Alarm Already Set"
-                        else if (isAlarmSet) "Update Alarm to ${
-                            String.format(
-                                Locale.getDefault(), "%02d:%02d", hour, minute
-                            )
-                        }"
-                        else "Set Alarm for ${
-                            String.format(
-                                Locale.getDefault(), "%02d:%02d", hour, minute
-                            )
-                        }"
+                        text = if (isAlarmSet && hour == lastSetHour && minute == lastSetMinute && repeatDays == lastSetRepeatDays)
+                            "Alarm Already Set"
+                        else {
+                            val daysText = when {
+                                repeatDays.isEmpty() -> ""
+                                repeatDays.size == 7 -> " (Every day)"
+                                else -> {
+                                    val dayMap = mapOf(
+                                        1 to "Su",  // Sunday
+                                        2 to "M",    // Monday
+                                        3 to "Tu",   // Tuesday
+                                        4 to "W",    // Wednesday
+                                        5 to "Th",   // Thursday
+                                        6 to "F",    // Friday
+                                        7 to "Sa"    // Saturday
+                                    )
+                                    // Sort days (Sunday first)
+                                    val sortedDays = repeatDays.sorted().map { dayMap[it] }.joinToString(" ")
+                                    " ($sortedDays)"
+                                }
+                            }
+
+                            if (isAlarmSet)
+                                "Update Alarm to ${String.format(Locale.getDefault(), "%02d:%02d", hour, minute)}$daysText"
+                            else
+                                "Set Alarm for ${String.format(Locale.getDefault(), "%02d:%02d", hour, minute)}$daysText"
+                        }
                     )
                 }
             }
