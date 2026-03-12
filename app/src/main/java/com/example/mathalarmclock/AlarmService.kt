@@ -15,10 +15,6 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
 class AlarmService : Service() {
-    companion object {
-        var isAlarmPlaying = false
-    }
-
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private lateinit var audioManager: AudioManager
@@ -86,7 +82,7 @@ class AlarmService : Service() {
                 @Suppress("DEPRECATION") vibrator?.vibrate(longArrayOf(0, 1000, 1000), 0)
             }
 
-            isAlarmPlaying = true  // Add this after starting
+            AlarmState.isPlaying = true
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -103,7 +99,7 @@ class AlarmService : Service() {
 
             // Abandon audio focus
             audioManager.abandonAudioFocus(null)
-            isAlarmPlaying = false  // Add this before stopping
+            AlarmState.isPlaying = false
         } catch (e: Exception) {
             e.printStackTrace()
         }

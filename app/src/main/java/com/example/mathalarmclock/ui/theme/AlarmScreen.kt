@@ -42,7 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mathalarmclock.AlarmService.Companion.isAlarmPlaying
+import com.example.mathalarmclock.AlarmState
 import com.example.mathalarmclock.MathActivity
 import com.example.mathalarmclock.R
 import com.example.mathalarmclock.Utilities
@@ -179,26 +179,17 @@ fun AlarmScreen() {
                         )
                     }
 
-                    if (isAlarmSet) {
-                        if (isAlarmPlaying) {
-                            // Alarm is currently ringing - open math screen
-                            Button(
-                                onClick = {
-                                    val intent = Intent(context, MathActivity::class.java).apply {
-                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                    }
-                                    context.startActivity(intent)
-                                }, modifier = Modifier.height(36.dp)
-                            ) {
-                                Text("Dismiss", fontSize = 14.sp)
-                            }
-                        } else {
-                            // Normal cancel when alarm not ringing
-                            Button(
-                                onClick = { cancelAlarm() }, modifier = Modifier.height(36.dp)
-                            ) {
-                                Text("Cancel", fontSize = 14.sp)
-                            }
+                    if (isAlarmSet && AlarmState.isPlaying) {
+                        // Only show Dismiss button when alarm is ringing
+                        Button(
+                            onClick = {
+                                val intent = Intent(context, MathActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
+                            }, modifier = Modifier.height(36.dp)
+                        ) {
+                            Text("Dismiss", fontSize = 14.sp)
                         }
                     }
                 }
@@ -234,6 +225,22 @@ fun AlarmScreen() {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier.padding(top = 4.dp))
+
+                    // Moved Cancel button inside the Column and inside isAlarmSet condition
+                    if (!AlarmState.isPlaying) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Button(
+                                onClick = { cancelAlarm() }, modifier = Modifier.height(36.dp)
+                            ) {
+                                Text("Cancel", fontSize = 14.sp)
+                            }
+                        }
+                    }
                 } else {
                     Text(
                         text = "Set a new alarm below",
@@ -243,6 +250,7 @@ fun AlarmScreen() {
                     )
                 }
             }
+            // Removed the standalone Cancel button from here
         }
 
         // Last Set Alarm Info (if different from current)
@@ -442,8 +450,7 @@ fun AlarmScreen() {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isAlarmSet && hour == lastSetHour && minute == lastSetMinute && repeatDays == lastSetRepeatDays)
-                            "Alarm Already Set"
+                        text = if (isAlarmSet && hour == lastSetHour && minute == lastSetMinute && repeatDays == lastSetRepeatDays) "Alarm Already Set"
                         else {
                             val daysText = when {
                                 repeatDays.isEmpty() -> ""
@@ -459,15 +466,22 @@ fun AlarmScreen() {
                                         7 to "Sa"    // Saturday
                                     )
                                     // Sort days (Sunday first)
-                                    val sortedDays = repeatDays.sorted().map { dayMap[it] }.joinToString(" ")
+                                    val sortedDays =
+                                        repeatDays.sorted().map { dayMap[it] }.joinToString(" ")
                                     " ($sortedDays)"
                                 }
                             }
 
-                            if (isAlarmSet)
-                                "Update Alarm to ${String.format(Locale.getDefault(), "%02d:%02d", hour, minute)}$daysText"
-                            else
-                                "Set Alarm for ${String.format(Locale.getDefault(), "%02d:%02d", hour, minute)}$daysText"
+                            if (isAlarmSet) "Update Alarm to ${
+                                String.format(
+                                    Locale.getDefault(), "%02d:%02d", hour, minute
+                                )
+                            }$daysText"
+                            else "Set Alarm for ${
+                                String.format(
+                                    Locale.getDefault(), "%02d:%02d", hour, minute
+                                )
+                            }$daysText"
                         }
                     )
                 }
