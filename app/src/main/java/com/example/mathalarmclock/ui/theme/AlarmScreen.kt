@@ -111,7 +111,7 @@ fun AlarmScreen() {
 
         // Update preferences
         val prefs = AlarmPreferences(context)
-        prefs.saveAlarm(lastSetHour, lastSetMinute, false, emptySet())  // Add emptySet()
+        prefs.saveAlarm(lastSetHour, lastSetMinute, false, lastSetRepeatDays)
 
         // Update UI state
         isAlarmSet = false
@@ -286,6 +286,10 @@ fun AlarmScreen() {
                     }
                     Button(
                         onClick = {
+                            android.util.Log.d(
+                                "AlarmScreen",
+                                "Use clicked - days: $lastSetRepeatDays"
+                            )
                             hour = lastSetHour
                             minute = lastSetMinute
                             repeatDays = lastSetRepeatDays

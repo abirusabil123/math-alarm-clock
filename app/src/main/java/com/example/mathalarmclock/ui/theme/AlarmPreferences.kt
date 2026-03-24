@@ -19,6 +19,7 @@ class AlarmPreferences(context: Context) {
     }
 
     fun saveAlarm(hour: Int, minute: Int, isSet: Boolean, repeatDays: Set<Int> = emptySet()) {
+        android.util.Log.d("AlarmPreferences", "Saving days: $repeatDays")
         prefs.edit().apply {
             putInt(KEY_LAST_SET_HOUR, hour)
             putInt(KEY_LAST_SET_MINUTE, minute)
@@ -32,7 +33,9 @@ class AlarmPreferences(context: Context) {
     fun getLastSetMinute(): Int = prefs.getInt(KEY_LAST_SET_MINUTE, DEFAULT_MINUTE)
     fun isAlarmSet(): Boolean = prefs.getBoolean(KEY_IS_ALARM_SET, false)
     fun getRepeatDays(): Set<Int> {
-        return prefs.getStringSet(KEY_REPEAT_DAYS, emptySet())?.mapNotNull { it.toIntOrNull() }
-            ?.toSet() ?: emptySet()
+        val stringSet = prefs.getStringSet(KEY_REPEAT_DAYS, emptySet()) ?: emptySet()
+        val result = stringSet.mapNotNull { it.toIntOrNull() }.toSet()
+        android.util.Log.d("AlarmPreferences", "Loading days: $result from $stringSet")
+        return result
     }
 }
