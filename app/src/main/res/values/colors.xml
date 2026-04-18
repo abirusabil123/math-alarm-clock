@@ -7,5 +7,5 @@
     <!-- Add splash screen colors for light and dark mode -->
     <color name="splash_background">#FFFFFF</color> <!-- Light mode background -->
 
-    <color name="ic_launcher_background">@color/purple_200</color>
+    <color name="ic_launcher_background">#FF6650a4</color> <!-- Primary color -->
 </resources>
