@@ -14,6 +14,9 @@ class AlarmPreferences(context: Context) {
         private const val KEY_LAST_SET_MINUTE = "last_set_minute"
         private const val KEY_IS_ALARM_SET = "is_alarm_set"
         private const val KEY_REPEAT_DAYS = "repeat_days"
+        private const val KEY_CURRENT_HOUR = "current_hour"
+        private const val KEY_CURRENT_MINUTE = "current_minute"
+        private const val KEY_CURRENT_DAYS = "current_days"
         private const val DEFAULT_HOUR = 12
         private const val DEFAULT_MINUTE = 0
     }
@@ -27,6 +30,22 @@ class AlarmPreferences(context: Context) {
             putStringSet(KEY_REPEAT_DAYS, repeatDays.map { it.toString() }.toSet())
             apply()
         }
+    }
+
+    fun saveCurrentSelection(hour: Int, minute: Int, days: Set<Int>) {
+        prefs.edit().apply {
+            putInt(KEY_CURRENT_HOUR, hour)
+            putInt(KEY_CURRENT_MINUTE, minute)
+            putStringSet(KEY_CURRENT_DAYS, days.map { it.toString() }.toSet())
+            apply()
+        }
+    }
+
+    fun getCurrentHour(): Int = prefs.getInt(KEY_CURRENT_HOUR, DEFAULT_HOUR)
+    fun getCurrentMinute(): Int = prefs.getInt(KEY_CURRENT_MINUTE, DEFAULT_MINUTE)
+    fun getCurrentDays(): Set<Int> {
+        val stringSet = prefs.getStringSet(KEY_CURRENT_DAYS, emptySet()) ?: emptySet()
+        return stringSet.mapNotNull { it.toIntOrNull() }.toSet()
     }
 
     fun getLastSetHour(): Int = prefs.getInt(KEY_LAST_SET_HOUR, DEFAULT_HOUR)

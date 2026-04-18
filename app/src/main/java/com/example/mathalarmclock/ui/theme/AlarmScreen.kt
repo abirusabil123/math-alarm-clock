@@ -68,8 +68,19 @@ fun AlarmScreen() {
         val prefs = AlarmPreferences(context)
         lastSetHour = prefs.getLastSetHour()
         lastSetMinute = prefs.getLastSetMinute()
-        lastSetRepeatDays = prefs.getRepeatDays()  // Add this line
+        lastSetRepeatDays = prefs.getRepeatDays()
         isAlarmSet = prefs.isAlarmSet()
+
+        // Load saved current selections
+        if (isAlarmSet) {
+            hour = lastSetHour
+            minute = lastSetMinute
+            repeatDays = lastSetRepeatDays
+        } else {
+            hour = prefs.getCurrentHour()
+            minute = prefs.getCurrentMinute()
+            repeatDays = prefs.getCurrentDays()
+        }
 
         // Format last set time
         val calendar = Calendar.getInstance().apply {
@@ -78,11 +89,12 @@ fun AlarmScreen() {
         }
         val format = SimpleDateFormat("hh:mm a", Locale.getDefault())
         lastSetTime = format.format(calendar.time)
+    }
 
-        // Initialize current selection with last set time
-        hour = lastSetHour
-        minute = lastSetMinute
-        repeatDays = lastSetRepeatDays  // Add this line
+    // Auto-save current selections when changed
+    LaunchedEffect(hour, minute, repeatDays) {
+        val prefs = AlarmPreferences(context)
+        prefs.saveCurrentSelection(hour, minute, repeatDays)
     }
 
     fun setAlarm() {
@@ -115,7 +127,6 @@ fun AlarmScreen() {
 
         // Update UI state
         isAlarmSet = false
-        repeatDays = emptySet()
     }
 
     Column(
@@ -287,8 +298,7 @@ fun AlarmScreen() {
                     Button(
                         onClick = {
                             android.util.Log.d(
-                                "AlarmScreen",
-                                "Use clicked - days: $lastSetRepeatDays"
+                                "AlarmScreen", "Use clicked - days: $lastSetRepeatDays"
                             )
                             hour = lastSetHour
                             minute = lastSetMinute
