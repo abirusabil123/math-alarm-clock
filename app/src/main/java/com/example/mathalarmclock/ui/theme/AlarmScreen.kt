@@ -140,13 +140,65 @@ fun AlarmScreen() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Header
+        // Header with countdown
+        var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+        LaunchedEffect(isAlarmSet) {
+            while (isAlarmSet) {
+                currentTime = System.currentTimeMillis()
+                kotlinx.coroutines.delay(60000)
+            }
+        }
+
+        val headerText = if (isAlarmSet) {
+            val now = Calendar.getInstance().apply { timeInMillis = currentTime }
+            val currentDay = now.get(Calendar.DAY_OF_WEEK)
+
+            val alarmCal = Calendar.getInstance().apply {
+                timeInMillis = currentTime
+                set(Calendar.HOUR_OF_DAY, lastSetHour)
+                set(Calendar.MINUTE, lastSetMinute)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            if (lastSetRepeatDays.isEmpty()) {
+                if (alarmCal.before(now)) alarmCal.add(Calendar.DAY_OF_MONTH, 1)
+            } else {
+                var daysToAdd = 0
+                var checkDay = currentDay
+                var found = false
+                while (daysToAdd <= 7) {
+                    if (lastSetRepeatDays.contains(checkDay)) {
+                        if (daysToAdd == 0 && alarmCal.after(now)) found = true
+                        else if (daysToAdd > 0) found = true
+                        if (found) break
+                    }
+                    daysToAdd++
+                    checkDay = if (checkDay == 7) 1 else checkDay + 1
+                }
+                alarmCal.add(Calendar.DAY_OF_MONTH, daysToAdd)
+            }
+
+            val diffMs = alarmCal.timeInMillis - now.timeInMillis
+            val hoursRemaining = diffMs / (1000 * 60 * 60)
+            val minutesRemaining = (diffMs / (1000 * 60)) % 60
+            "Math Alarm Clock\nAlarm in %02d hours %02d minutes".format(
+                hoursRemaining,
+                minutesRemaining
+            )
+        } else {
+            "Math Alarm Clock"
+        }
+
         Text(
-            text = "Math Alarm Clock",
+            text = headerText,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(16.dp)
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
