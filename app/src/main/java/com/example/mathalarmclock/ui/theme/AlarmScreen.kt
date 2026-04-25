@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,12 +32,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -141,7 +144,7 @@ fun AlarmScreen() {
         Spacer(modifier = Modifier.height(24.dp))
 
         // Header with countdown
-        var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+        var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
         LaunchedEffect(isAlarmSet) {
             while (isAlarmSet) {
                 currentTime = System.currentTimeMillis()
@@ -183,8 +186,7 @@ fun AlarmScreen() {
             val hoursRemaining = diffMs / (1000 * 60 * 60)
             val minutesRemaining = (diffMs / (1000 * 60)) % 60
             "Math Alarm Clock\nAlarm in %02d hours %02d minutes".format(
-                hoursRemaining,
-                minutesRemaining
+                hoursRemaining, minutesRemaining
             )
         } else {
             "Math Alarm Clock"
@@ -280,8 +282,8 @@ fun AlarmScreen() {
                                 6 to "Fri",
                                 7 to "Sat"
                             )
-                            val days = lastSetRepeatDays.sorted().map { dayNames[it] }
-                                .joinToString(", ")
+                            val days = lastSetRepeatDays.sorted()
+                                .joinToString(", ") { dayNames[it].toString() }
                             "Rings on: $days"
                         }
                     },
@@ -389,7 +391,9 @@ fun AlarmScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = String.format(Locale.getDefault(), "%02d:%02d", hour, minute),
+                        text = String.format(
+                            LocalLocale.current.platformLocale, "%02d:%02d", hour, minute
+                        ),
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
                         fontSize = 48.sp,
@@ -405,25 +409,29 @@ fun AlarmScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Hour: ${String.format(Locale.getDefault(), "%02d", hour)}",
-                        modifier = Modifier.width(80.dp),
-                        fontWeight = FontWeight.Medium
+                        text = "Hour: ${
+                            String.format(
+                                LocalLocale.current.platformLocale, "%02d", hour
+                            )
+                        }", modifier = Modifier.width(80.dp), fontWeight = FontWeight.Medium
                     )
                     Slider(
                         value = hour.toFloat(), onValueChange = {
-                            hour = it.toInt()
-                            // Vibrate on change
-                            val vibrator =
-                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                vibrator.vibrate(
-                                    VibrationEffect.createOneShot(
-                                        10, VibrationEffect.DEFAULT_AMPLITUDE
-                                    )
-                                )
+                            hour = it.toInt() // or minute = it.toInt()
+
+                            // Get the vibrator in a modern, non-deprecated way
+                            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val vibratorManager =
+                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                vibratorManager.defaultVibrator
                             } else {
-                                @Suppress("DEPRECATION") vibrator.vibrate(10)
+                                @Suppress("DEPRECATION")
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                             }
+
+                            vibrator.vibrate(
+                                VibrationEffect.createOneShot(10, VibrationEffect.DEFAULT_AMPLITUDE)
+                            )
                         }, valueRange = 0f..23f, modifier = Modifier.weight(1f), steps = 23
                     )
                 }
@@ -434,25 +442,29 @@ fun AlarmScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Minute: ${String.format(Locale.getDefault(), "%02d", minute)}",
-                        modifier = Modifier.width(80.dp),
-                        fontWeight = FontWeight.Medium
+                        text = "Minute: ${
+                            String.format(
+                                LocalLocale.current.platformLocale, "%02d", minute
+                            )
+                        }", modifier = Modifier.width(80.dp), fontWeight = FontWeight.Medium
                     )
                     Slider(
                         value = minute.toFloat(), onValueChange = {
                             minute = it.toInt()
-                            // Vibrate on change
-                            val vibrator =
-                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                vibrator.vibrate(
-                                    VibrationEffect.createOneShot(
-                                        10, VibrationEffect.DEFAULT_AMPLITUDE
-                                    )
-                                )
+
+                            // Get the vibrator in a modern, non-deprecated way
+                            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val vibratorManager =
+                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                vibratorManager.defaultVibrator
                             } else {
-                                @Suppress("DEPRECATION") vibrator.vibrate(10)
+                                @Suppress("DEPRECATION")
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
                             }
+
+                            vibrator.vibrate(
+                                VibrationEffect.createOneShot(10, VibrationEffect.DEFAULT_AMPLITUDE)
+                            )
                         }, valueRange = 0f..59f, modifier = Modifier.weight(1f), steps = 59
                     )
                 }
@@ -517,39 +529,38 @@ fun AlarmScreen() {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (isAlarmSet && hour == lastSetHour && minute == lastSetMinute && repeatDays == lastSetRepeatDays) "Alarm Already Set"
-                        else {
-                            val daysText = when {
-                                repeatDays.isEmpty() -> ""
-                                repeatDays.size == 7 -> " (Every day)"
-                                else -> {
-                                    val dayMap = mapOf(
-                                        1 to "Su",  // Sunday
-                                        2 to "M",    // Monday
-                                        3 to "Tu",   // Tuesday
-                                        4 to "W",    // Wednesday
-                                        5 to "Th",   // Thursday
-                                        6 to "F",    // Friday
-                                        7 to "Sa"    // Saturday
-                                    )
-                                    // Sort days (Sunday first)
-                                    val sortedDays =
-                                        repeatDays.sorted().map { dayMap[it] }.joinToString(" ")
-                                    " ($sortedDays)"
-                                }
+                    else {
+                        val daysText = when {
+                            repeatDays.isEmpty() -> ""
+                            repeatDays.size == 7 -> " (Every day)"
+                            else -> {
+                                val dayMap = mapOf(
+                                    1 to "Su",  // Sunday
+                                    2 to "M",    // Monday
+                                    3 to "Tu",   // Tuesday
+                                    4 to "W",    // Wednesday
+                                    5 to "Th",   // Thursday
+                                    6 to "F",    // Friday
+                                    7 to "Sa"    // Saturday
+                                )
+                                // Sort days (Sunday first)
+                                val sortedDays = repeatDays.sorted()
+                                    .joinToString(" ") { dayMap[it].toString() }
+                                " ($sortedDays)"
                             }
-
-                            if (isAlarmSet) "Update Alarm to ${
-                                String.format(
-                                    Locale.getDefault(), "%02d:%02d", hour, minute
-                                )
-                            }$daysText"
-                            else "Set Alarm for ${
-                                String.format(
-                                    Locale.getDefault(), "%02d:%02d", hour, minute
-                                )
-                            }$daysText"
                         }
-                    )
+
+                        if (isAlarmSet) "Update Alarm to ${
+                            String.format(
+                                LocalLocale.current.platformLocale, "%02d:%02d", hour, minute
+                            )
+                        }$daysText"
+                        else "Set Alarm for ${
+                            String.format(
+                                LocalLocale.current.platformLocale, "%02d:%02d", hour, minute
+                            )
+                        }$daysText"
+                    })
                 }
             }
         }

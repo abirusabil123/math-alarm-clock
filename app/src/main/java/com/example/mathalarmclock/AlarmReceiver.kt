@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -18,7 +17,7 @@ class AlarmReceiver : BroadcastReceiver() {
         // Get alarm details from intent
         val hour = intent.getIntExtra("hour", 0)
         val minute = intent.getIntExtra("minute", 0)
-        val repeatDays = intent.getSerializableExtra("repeatDays") as? Array<Int> ?: emptyArray()
+        val repeatDays = intent.getIntArrayExtra("repeatDays") ?: intArrayOf()
 
         // Start foreground service to play alarm
         val serviceIntent = Intent(context, AlarmService::class.java).apply {
@@ -27,11 +26,7 @@ class AlarmReceiver : BroadcastReceiver() {
             putExtra("repeatDays", repeatDays)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(serviceIntent)
-        } else {
-            context.startService(serviceIntent)
-        }
+        context.startForegroundService(serviceIntent)
 
         val mathIntent = Intent(context, MathActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -57,18 +52,16 @@ class AlarmReceiver : BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = android.app.NotificationChannel(
-                "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                setBypassDnd(true)
-                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
-                enableLights(true)
-                enableVibration(true)
-                setSound(null, null)
-            }
-            notificationManager.createNotificationChannel(channel)
+        val channel = android.app.NotificationChannel(
+            "alarm_channel", "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            setBypassDnd(true)
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            enableLights(true)
+            enableVibration(true)
+            setSound(null, null)
         }
+        notificationManager.createNotificationChannel(channel)
 
         notificationManager.notify(1, notificationBuilder.build())
     }

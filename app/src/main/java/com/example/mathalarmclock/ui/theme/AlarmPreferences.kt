@@ -5,21 +5,20 @@ package com.example.mathalarmclock.ui.theme
 import android.content.Context
 import android.content.SharedPreferences
 
+
+private const val KEY_LAST_SET_HOUR = "last_set_hour"
+private const val KEY_LAST_SET_MINUTE = "last_set_minute"
+private const val KEY_IS_ALARM_SET = "is_alarm_set"
+private const val KEY_REPEAT_DAYS = "repeat_days"
+private const val KEY_CURRENT_HOUR = "current_hour"
+private const val KEY_CURRENT_MINUTE = "current_minute"
+private const val KEY_CURRENT_DAYS = "current_days"
+private const val DEFAULT_HOUR = 12
+private const val DEFAULT_MINUTE = 0
+
 class AlarmPreferences(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
-
-    companion object {
-        private const val KEY_LAST_SET_HOUR = "last_set_hour"
-        private const val KEY_LAST_SET_MINUTE = "last_set_minute"
-        private const val KEY_IS_ALARM_SET = "is_alarm_set"
-        private const val KEY_REPEAT_DAYS = "repeat_days"
-        private const val KEY_CURRENT_HOUR = "current_hour"
-        private const val KEY_CURRENT_MINUTE = "current_minute"
-        private const val KEY_CURRENT_DAYS = "current_days"
-        private const val DEFAULT_HOUR = 12
-        private const val DEFAULT_MINUTE = 0
-    }
 
     fun saveAlarm(hour: Int, minute: Int, isSet: Boolean, repeatDays: Set<Int> = emptySet()) {
         android.util.Log.d("AlarmPreferences", "Saving days: $repeatDays")

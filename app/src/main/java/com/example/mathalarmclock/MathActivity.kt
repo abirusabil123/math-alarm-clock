@@ -4,6 +4,7 @@ package com.example.mathalarmclock
 
 import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -22,7 +23,13 @@ class MathActivity : ComponentActivity() {
         // Get alarm details
         hour = intent.getIntExtra("hour", 0)
         minute = intent.getIntExtra("minute", 0)
-        repeatDays = intent.getSerializableExtra("repeatDays") as? Array<Int> ?: emptyArray()
+        // Modern type-safe way to get Serializable
+        repeatDays = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getSerializableExtra("repeatDays", Array<Int>::class.java) ?: emptyArray()
+        } else {
+            @Suppress("DEPRECATION", "UNCHECKED_CAST")
+            (intent.getSerializableExtra("repeatDays") as? Array<Int>) ?: emptyArray()
+        }
 
         // Dismiss notification when activity starts
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -52,11 +59,5 @@ class MathActivity : ComponentActivity() {
         }
 
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // DO NOT stop the alarm here - it should continue if activity is destroyed without solving
-        // The alarm will keep playing until user solves it and calls stopAlarm()
     }
 }
