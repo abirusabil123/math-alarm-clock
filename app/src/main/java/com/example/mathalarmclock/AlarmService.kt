@@ -19,6 +19,9 @@ import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 
+const val CHANNEL_ID = "alarm_channel"
+const val NOTIFICATION_ID = 1
+
 class AlarmService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
@@ -36,19 +39,13 @@ class AlarmService : Service() {
                     mediaPlayer?.start()
                 }
             }
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK,
-            AudioManager.AUDIOFOCUS_LOSS -> {
+
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK, AudioManager.AUDIOFOCUS_LOSS -> {
                 if (mediaPlayer?.isPlaying == true) {
                     mediaPlayer?.pause()
                 }
             }
         }
-    }
-
-    companion object {
-        const val CHANNEL_ID = "alarm_channel"
-        const val NOTIFICATION_ID = 1
     }
 
     override fun onCreate() {
@@ -58,8 +55,7 @@ class AlarmService : Service() {
     }
 
     private fun createNotificationChannel() {
-        val notificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
             CHANNEL_ID, "Alarm Notifications", NotificationManager.IMPORTANCE_HIGH
         ).apply {
