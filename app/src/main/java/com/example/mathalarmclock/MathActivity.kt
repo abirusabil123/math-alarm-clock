@@ -2,7 +2,6 @@
 
 package com.example.mathalarmclock
 
-import android.app.NotificationManager
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
@@ -24,10 +23,6 @@ class MathActivity : ComponentActivity() {
         minute = intent.getIntExtra("minute", 0)
         repeatDays = intent.getIntArrayExtra("repeatDays") ?: intArrayOf()
 
-        // Dismiss notification when activity starts
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.cancel(1)
-
         // Keep screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -42,7 +37,7 @@ class MathActivity : ComponentActivity() {
     }
 
     private fun stopAlarm() {
-        // Stop alarm service
+        // Stop alarm service (this will also remove the foreground notification)
         val serviceIntent = Intent(this, AlarmService::class.java)
         stopService(serviceIntent)
 
