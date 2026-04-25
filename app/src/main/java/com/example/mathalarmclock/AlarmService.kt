@@ -29,6 +29,23 @@ class AlarmService : Service() {
     private var minute: Int = 0
     private var repeatDays: IntArray = intArrayOf()
 
+    private val audioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if (mediaPlayer?.isPlaying == false) {
+                    mediaPlayer?.start()
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK,
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                if (mediaPlayer?.isPlaying == true) {
+                    mediaPlayer?.pause()
+                }
+            }
+        }
+    }
+
     companion object {
         const val CHANNEL_ID = "alarm_channel"
         const val NOTIFICATION_ID = 1
@@ -81,7 +98,7 @@ class AlarmService : Service() {
 
             focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                 .setAudioAttributes(playbackAttributes).setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener { }.build()
+                .setOnAudioFocusChangeListener(audioFocusChangeListener).build()
 
             val result = audioManager.requestAudioFocus(focusRequest!!)
 
