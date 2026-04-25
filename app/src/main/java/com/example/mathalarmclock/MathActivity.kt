@@ -4,7 +4,6 @@ package com.example.mathalarmclock
 
 import android.app.NotificationManager
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -15,7 +14,7 @@ import com.example.mathalarmclock.ui.theme.MathPuzzleScreen
 class MathActivity : ComponentActivity() {
     private var hour: Int = 0
     private var minute: Int = 0
-    private var repeatDays: Array<Int> = emptyArray()
+    private var repeatDays: IntArray = intArrayOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,13 +22,7 @@ class MathActivity : ComponentActivity() {
         // Get alarm details
         hour = intent.getIntExtra("hour", 0)
         minute = intent.getIntExtra("minute", 0)
-        // Modern type-safe way to get Serializable
-        repeatDays = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("repeatDays", Array<Int>::class.java) ?: emptyArray()
-        } else {
-            @Suppress("DEPRECATION", "UNCHECKED_CAST")
-            (intent.getSerializableExtra("repeatDays") as? Array<Int>) ?: emptyArray()
-        }
+        repeatDays = intent.getIntArrayExtra("repeatDays") ?: intArrayOf()
 
         // Dismiss notification when activity starts
         val notificationManager = getSystemService(NotificationManager::class.java)

@@ -10,7 +10,6 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
-import androidx.compose.ui.text.intl.Locale
 import java.util.Calendar
 
 object Utilities {
@@ -21,20 +20,33 @@ object Utilities {
         repeatDays: Set<Int> = emptySet(),
         showToast: Boolean = true
     ) {
+        val now = Calendar.getInstance()
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
             set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
 
-            if (before(Calendar.getInstance())) {
-                add(Calendar.DAY_OF_MONTH, 1)
+            if (repeatDays.isEmpty()) {
+                if (before(now)) {
+                    add(Calendar.DAY_OF_MONTH, 1)
+                }
+            } else {
+                // Find the next occurrence on a repeat day
+                while (true) {
+                    val isRepeatDay = repeatDays.contains(get(Calendar.DAY_OF_WEEK))
+                    if (isRepeatDay && after(now)) {
+                        break
+                    }
+                    add(Calendar.DAY_OF_MONTH, 1)
+                }
             }
         }
 
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("hour", hour)
             putExtra("minute", minute)
-            putExtra("repeatDays", repeatDays.toTypedArray())
+            putExtra("repeatDays", repeatDays.toIntArray())
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -52,7 +64,7 @@ object Utilities {
                     Toast.makeText(
                         context, "Alarm set for ${
                             String.format(
-                                Locale.current.region, "%02d:%02d", hour, minute
+                                java.util.Locale.getDefault(), "%02d:%02d", hour, minute
                             )
                         }", Toast.LENGTH_LONG
                     ).show()
@@ -74,7 +86,7 @@ object Utilities {
                     Toast.makeText(
                         context, "Alarm set for ${
                             String.format(
-                                Locale.current.region, "%02d:%02d", hour, minute
+                                java.util.Locale.getDefault(), "%02d:%02d", hour, minute
                             )
                         }", Toast.LENGTH_LONG
                     ).show()

@@ -21,22 +21,24 @@ class AlarmService : Service() {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private lateinit var audioManager: AudioManager
-
-    // 1. Add this to track focus request for Android 8.0+
     private var focusRequest: AudioFocusRequest? = null
+
+    private var hour: Int = 0
+    private var minute: Int = 0
+    private var repeatDays: IntArray = intArrayOf()
 
     override fun onCreate() {
         super.onCreate()
-        android.util.Log.d("AlarmService", "onCreate called")
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        startForeground(1, createNotification())
-        startAlarm()
     }
 
     @SuppressLint("FullScreenIntentPolicy")
     private fun createNotification(): android.app.Notification {
         val intent = Intent(this, MathActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("hour", hour)
+            putExtra("minute", minute)
+            putExtra("repeatDays", repeatDays)
         }
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -51,13 +53,12 @@ class AlarmService : Service() {
 
     private fun startAlarm() {
         try {
-            // 2. Updated Audio Focus Logic
             val playbackAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
 
             focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                 .setAudioAttributes(playbackAttributes).setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener { /* Handle focus changes if needed */ }.build()
+                .setOnAudioFocusChangeListener { }.build()
 
             val result = audioManager.requestAudioFocus(focusRequest!!)
 
@@ -65,10 +66,7 @@ class AlarmService : Service() {
                 setDataSource(
                     this@AlarmService, "android.resource://${packageName}/${R.raw.alarm}".toUri()
                 )
-
-                // FIX: Use setAudioAttributes instead of setAudioStreamType
                 setAudioAttributes(playbackAttributes)
-
                 setWakeMode(this@AlarmService, PowerManager.PARTIAL_WAKE_LOCK)
                 isLooping = true
                 prepare()
@@ -102,33 +100,30 @@ class AlarmService : Service() {
             mediaPlayer?.stop()
             mediaPlayer?.release()
             mediaPlayer = null
-
             vibrator?.cancel()
             vibrator = null
-
-            // 3. Updated Abandon Focus Logic
             focusRequest?.let { audioManager.abandonAudioFocusRequest(it) }
-
             AlarmState.isPlaying = false
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        // Use the modern flag-based method
         stopForeground(STOP_FOREGROUND_REMOVE)
-
         stopSelf()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        android.util.Log.d("AlarmService", "onStartCommand called")
+        hour = intent?.getIntExtra("hour", 0) ?: 0
+        minute = intent?.getIntExtra("minute", 0) ?: 0
+        repeatDays = intent?.getIntArrayExtra("repeatDays") ?: intArrayOf()
+
+        startForeground(1, createNotification())
+        startAlarm()
         return START_STICKY
     }
 
     override fun onDestroy() {
-        android.util.Log.d("AlarmService", "onDestroy called")
         super.onDestroy()
         stopAlarm()
     }
